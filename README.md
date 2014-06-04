@@ -32,7 +32,7 @@ var_dump($rv);
 //get info about uploaded video
 $v = $r->getVideo($rv['video_id']);
 ?>
-<pre>
+</pre>
 <br/>
 &lt;iframe src=&quot;&lt;?= $v['embed_url'] ?&gt;&quot;&gt;&lt;/iframe&gt;
 
