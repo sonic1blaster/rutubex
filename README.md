@@ -32,5 +32,5 @@ var_dump($rv);
 //get info about uploaded video
 $v = $r->getVideo($rv['video_id']);
 ?>
+&lt;iframe src=&quot;&lt;?= $v['embed_url'] ?&gt;&quot;&gt;&lt;/iframe&gt;
 
-<iframe src="<?= $v['embed_url'] ?>"></iframe>
