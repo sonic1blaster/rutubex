@@ -4,7 +4,7 @@ rutubex
 PHP class for API rutube.ru. Now in progress.
 
 Simple example of upload video in rutube.
-
+<pre>
 <?
 include("rutubex.php");
 $r = new rutubex('b1e28995fb913c1cd00007a453c610e8da0b1158');
@@ -32,5 +32,7 @@ var_dump($rv);
 //get info about uploaded video
 $v = $r->getVideo($rv['video_id']);
 ?>
+<pre>
+<br/>
 &lt;iframe src=&quot;&lt;?= $v['embed_url'] ?&gt;&quot;&gt;&lt;/iframe&gt;
 
