@@ -6,7 +6,7 @@
  * Time: 15:28
  */
 
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 
 
 class rutubex {
@@ -24,7 +24,7 @@ class rutubex {
             if (is_array($auth)) {
                 $t = $this->send('POST', '/accounts/token_auth/', $auth);
                 if (!empty($t)) {
-                    self::$token = $t['token'];
+                    self::$token = $t->token;
                 }
             } elseif(is_string($auth)) {
                 self::$token = $auth;
@@ -51,20 +51,22 @@ class rutubex {
      * @param bool $is_hidden
      * @param int $category_id
      * @param int $type
+     * @param bool $is_adult
      * @return array
      */
-    private function _loadVideo($url='',$callback_url='',$errback_url='',$query_fields='',$extra='',$title='',$description='',$is_hidden=true,$category_id=13,$type=1) {
+    private function _loadVideo($url='',$callback_url='',$errback_url='',$query_fields='',$extra='',$title='',$description='',$is_hidden=true,$category_id=13,$type=1,$is_adult=false) {
         $snd = array(
             'url' => $url,
             'callback_url' => $callback_url,
             'errback_url' => $errback_url,
             'query_fields' => $query_fields,
             'extra' => $extra,
-            'title' => $title,
+            'title' => substr($title, 0, 99),
             'description' => $description,
             'is_hidden' => $is_hidden,
             'category_id' => $category_id,
             'type' => $type,
+            'is_adult' => $is_adult,
         );
         return $this->send('POST', '/video/', $snd);
     }
@@ -108,14 +110,16 @@ class rutubex {
      * @param string $description
      * @param bool $is_hidden
      * @param int $category
+     * @param bool $is_adult
      * @return bool|mixed
      */
-    private function _editVideo($id='', $title='', $description='', $is_hidden=true, $category=13) {
+    private function _editVideo($id='', $title='', $description='', $is_hidden=true, $category=13, $is_adult = false) {
         $snd = array(
             'title' => $title,
             'description' => $description,
             'is_hidden' => $is_hidden,
             'category' => $category,
+            'is_adult' => $is_adult,
         );
         return $this->send('PUT', '/video/'.$id, $snd);
     }
@@ -132,7 +136,7 @@ class rutubex {
      * @param int|string $ext_id
      * @return bool|mixed
      */
-    private function _editVideoToTvShow($tvId, $year='', $video_id='', $season='', $episode='', $fragment='', $episode_global='', $type=2, $ext_id=0) {
+    public function _editVideoToTvShow($tvId, $year='', $video_id='', $season='', $episode='', $fragment='', $episode_global='', $type=2, $ext_id=0) {
         $snd = array(
             'tv' => $tvId,
             'year' => $year,
@@ -144,7 +148,7 @@ class rutubex {
             'type' => $type,
             'ext_id' => $ext_id,
         );
-        return $this->send('PUT', '/metainfo/contenttvs/'.$video_id, $snd);
+        return $this->send('PATCH', '/metainfo/contenttvs/'.$video_id, $snd, 'json');
     }
 
     /**
@@ -161,6 +165,12 @@ class rutubex {
         return $video;
     }
 
+    public function getMyVideos($i = 1) {
+        $video = $this->send('GET', '/video/person/?page='.$i);
+
+        return $video;
+    }
+
     /**
      * @param string $videoUrl
      * @param string $name
@@ -173,11 +183,12 @@ class rutubex {
      * @param int $episode
      * @param int $type
      * @param int $extId
+     * @param $is_adult
      * @return bool|mixed
      */
-    public function addVideo($videoUrl='', $name='', $descr='', $isHidden=true, $category=13, $tvName='', $year='', $season=0, $episode=1, $type=2,$extId=0) {
+    public function addVideo($videoUrl='', $name='', $descr='', $isHidden=true, $category=13, $tvName='', $year='', $season=0, $episode=1, $type=2,$extId=0,$is_adult) {
         $year = (!empty($year)) ? $year : date('Y');
-        if ($resV = $this->_loadVideo($videoUrl,'','','','',$name,$descr,$isHidden,$category)) {
+        if ($resV = $this->_loadVideo($videoUrl,'','','','',$name,$descr,$isHidden,$category,$type,$is_adult)) {
             sleep(1);
             $resT = $this->_addVideoToTvShow(
                 array('name' => $tvName),
@@ -192,9 +203,24 @@ class rutubex {
         }
     }
 
-    public function editVideo($videoId, $name, $descr, $isHidden, $category, $tvName, $year, $season, $episode, $type,$extId) {
+    /**
+     * @param $videoId
+     * @param $name
+     * @param $descr
+     * @param $isHidden
+     * @param $category
+     * @param $tvName
+     * @param $year
+     * @param $season
+     * @param $episode
+     * @param $type
+     * @param $extId
+     * @param $is_adult
+     * @return array
+     */
+    public function editVideo($videoId, $name, $descr, $isHidden, $category, $tvName, $year, $season, $episode, $type,$extId,$is_adult) {
         $year = (!empty($year)) ? $year : date('Y');
-        if ($resV = $this->_editVideo($videoId,$name,$descr,$isHidden,$category)) {
+        if ($resV = $this->_editVideo($videoId,$name,$descr,$isHidden,$category,$is_adult)) {
             sleep(1);
             $resT = $this->_editVideoToTvShow(
                 $tvName,
@@ -207,6 +233,13 @@ class rutubex {
             );
             return array_merge($resV, $resT);
         }
+    }
+
+    public function editThumbnail($videoId, $file) {
+        $snd = array(
+            'file' => '@'.$file
+        );
+        return $this->send('POST', '/video/'.$videoId.'/thumbnail/', $snd);
     }
 
     /**
@@ -234,6 +267,11 @@ class rutubex {
     }
 
 
+    public function getTvShowByVideoId($id = '') {
+        return $this->send('GET', '/metainfo/contenttvs/'.$id);
+    }
+
+
     /**
      * @param string $method
      * @param string $apiMethod
@@ -246,25 +284,29 @@ class rutubex {
         $ch = curl_init($this->apiUrl.$apiMethod);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        if ($type == 'query') {
-            $data = http_build_query($data);
-        } elseif($type == 'json') {
-            $data = json_encode($data);
-            array_push($head, 'Accept: application/json');
-            array_push($head, 'Content-type: application/json');
+
+        if ($method == 'POST') {
+            array_push($head, 'Content-type: multipart/form-data');
+        } else {
+            if ($type == 'query') {
+                $data = http_build_query($data);
+            } elseif ($type == 'json') {
+                $data = json_encode($data);
+                array_push($head, 'Accept: application/json');
+                array_push($head, 'Content-type: application/json');
+            }
         }
+
         if (!empty(self::$token)) {
             array_push($head, 'Authorization: Token '.self::$token);
         }
+
         curl_setopt($ch, CURLOPT_HTTPHEADER, $head);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         $response = curl_exec($ch);
         $resInfo = curl_getinfo($ch);
-        /*var_dump($head);
-        var_dump($data);
-        var_dump($response);
-        var_dump($resInfo);*/
+
         if (!$response && $resInfo['http_code'] > 300) {
             switch ($resInfo['http_code']) {
                 case 400:
