@@ -23,7 +23,8 @@ $rv = $r->addVideo(
     1,                                  //season
     1,                                  //current series
     2,                                  //type of video
-    154466                              //id in your CMS
+    154466,                             //id in your CMS
+    false                               //adult
 );
 
 //if request will success returned array of video with rutube id.
