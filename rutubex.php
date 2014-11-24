@@ -24,7 +24,7 @@ class rutubex {
             if (is_array($auth)) {
                 $t = $this->send('POST', '/accounts/token_auth/', $auth);
                 if (!empty($t)) {
-                    self::$token = $t->token;
+                    self::$token=$t['token'];
                 }
             } elseif(is_string($auth)) {
                 self::$token = $auth;
