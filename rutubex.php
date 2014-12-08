@@ -4,10 +4,11 @@
  * User: rkoshkarov
  * Date: 27.05.14
  * Time: 15:28
+ *
+ * Version 0.5
+ * Edit method 'errLog' to load log into yours container.
+ * Thanks for use. RusKoshkarov.
  */
-
-//error_reporting(E_ALL);
-
 
 class rutubex {
     private $apiUrl = 'http://rutube.ru/api';
@@ -24,7 +25,7 @@ class rutubex {
             if (is_array($auth)) {
                 $t = $this->send('POST', '/accounts/token_auth/', $auth);
                 if (!empty($t)) {
-                    self::$token=$t['token'];
+                    self::$token = $t['token'];
                 }
             } elseif(is_string($auth)) {
                 self::$token = $auth;
@@ -32,6 +33,10 @@ class rutubex {
         }
     }
 
+    /**
+     * @param $obj
+     * @return array
+     */
     private function _toArray($obj){
         $rc = (array)$obj;
         foreach($rc as &$field){
@@ -165,6 +170,10 @@ class rutubex {
         return $video;
     }
 
+    /**
+     * @param int $i
+     * @return bool|mixed
+     */
     public function getMyVideos($i = 1) {
         $video = $this->send('GET', '/video/person/?page='.$i);
 
@@ -201,6 +210,7 @@ class rutubex {
             );
             return array_merge($resV, $resT);
         }
+        return false;
     }
 
     /**
@@ -233,13 +243,32 @@ class rutubex {
             );
             return array_merge($resV, $resT);
         }
+        return false;
     }
 
+    /**
+     * @param $videoId
+     * @param $file
+     * @return bool|mixed
+     */
     public function editThumbnail($videoId, $file) {
         $snd = array(
             'file' => '@'.$file
         );
         return $this->send('POST', '/video/'.$videoId.'/thumbnail/', $snd);
+    }
+
+    /**
+     * @param $videoId
+     * @param $dt
+     * @return bool|mixed
+     */
+    public function editPubDate($videoId, $dt) {
+        $snd = array(
+            'timestamp' => $dt,
+            'video' => $videoId
+        );
+        return $this->send('POST', '/video/publication/', $snd);
     }
 
     /**
@@ -249,7 +278,6 @@ class rutubex {
     public function deleteVideo($id = '') {
         return $this->send('DELETE', '/video/'.$id);
     }
-
 
     /**
      * @return bool|mixed
@@ -266,7 +294,10 @@ class rutubex {
         return $this->send('GET', '/metainfo/tv/'.$id, array('format' => 'json'));
     }
 
-
+    /**
+     * @param string $id
+     * @return bool|mixed
+     */
     public function getTvShowByVideoId($id = '') {
         return $this->send('GET', '/metainfo/contenttvs/'.$id);
     }
@@ -335,6 +366,7 @@ class rutubex {
                 return true;
             }
         }
+        return false;
     }
 
     /**

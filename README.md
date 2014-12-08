@@ -1,9 +1,10 @@
 rutubex
 =======
 
-PHP class for API rutube.ru. Now in progress.
+PHP class for API rutube.ru. Actual is alpha v.0.5
+*For use need installed CURL on your php.
 
-Simple example of upload video in rutube.
+Simple example of use this library.
 <pre>
 <?
 include("rutubex.php");
@@ -32,6 +33,35 @@ var_dump($rv);
 
 //get info about uploaded video
 $v = $r->getVideo($rv['video_id']);
+
+// Change preview screen
+$rtv = $r->editThumbnail(
+    $rv['video_id'],        //Rutube video ID
+    $_FILE['tmp_name']      //uploaded image
+);
+
+// Change preview screen
+$rtv = $r->editThumbnail(
+    $rv['video_id'],        //Rutube video ID
+    $_FILE['tmp_name']      //uploaded image
+);
+
+// Remove video from Rutube *(Factly video change special status to deleted and video always be saved on rutube side, but users can not view this video)
+$r->deleteVideo($rv['video_id']);
+
+//Set time of publication
+$tt = array(
+    'YYYY' => '2014',
+    'MM' => '12',
+    'DD' => '07',
+    'HH' => '04',
+    'MI' => '30',
+    'SS' => '00'
+);
+$rtv = $r->editPubDate(
+    $rv['video_id'],        //Rutube video ID
+    $tt['YYYY'].'-'.$tt['MM'].'-'.$tt['DD'].'T'.$tt['HH'].':'.$tt['MI'].':'.$tt['SS'] //Special time format 
+);
 ?>
 </pre>
 <br/>
