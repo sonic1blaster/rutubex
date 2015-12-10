@@ -5,8 +5,7 @@ PHP class for API rutube.ru. Actual is alpha v.0.5
 *For use need installed CURL on your php.
 
 Simple example of use this library.
-<pre>
-<?
+```
 include("rutubex.php");
 $r = new rutubex('b1e28995fb913c1cd00007a453c610e8da0b1158');
 
@@ -62,8 +61,10 @@ $rtv = $r->editPubDate(
     $rv['video_id'],        //Rutube video ID
     $tt['YYYY'].'-'.$tt['MM'].'-'.$tt['DD'].'T'.$tt['HH'].':'.$tt['MI'].':'.$tt['SS'] //Special time format 
 );
-?>
-</pre>
-<br/>
-&lt;iframe src=&quot;&lt;?= $v['embed_url'] ?&gt;&quot;&gt;&lt;/iframe&gt;
+```
+
+
+```
+<iframe src="<?= $v['embed_url'] ?>"></iframe>
+```
 
